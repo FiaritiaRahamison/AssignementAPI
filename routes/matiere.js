@@ -26,3 +26,21 @@ function getMatiere(req, res){
         res.json(matiere);
     })
 }
+
+function postMatiere(req, res) {
+    let matiere = new Matiere();
+    matiere.nom = req.body.nom;
+    matiere.image = req.body.image;
+
+    console.log("POST matiere reçu :");
+    console.log(matiere);
+
+    matiere.save((err) => {
+        if(err) {
+            res.send('Matiere non enregistrée ', err);
+        }
+        res.json({message: `${matiere.nom} enregistrée!`})
+    })
+}
+
+module.exports = { getMatieres, getMatiere, postMatiere };

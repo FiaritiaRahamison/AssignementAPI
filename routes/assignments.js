@@ -1,4 +1,6 @@
 let Assignment = require('../model/assignment');
+let Eleve = require('../model/eleve');
+let Matiere = require('../model/matiere');
 
 // Récupérer tous les assignments (GET)
 /*
@@ -57,15 +59,31 @@ function postAssignment(req, res){
     assignment.note = req.body.note;
     assignment.remarques = req.body.remarques;
 
-    console.log("POST assignment reçu :");
-    console.log(assignment)
+    let auteurId = req.body.auteurId;
+    let matiereId = req.body.matiereId;
 
-    assignment.save( (err) => {
-        if(err){
-            res.send('cant post assignment ', err);
+    Eleve.findById(auteurId, (err, eleve) => {
+        if (err) {
+          return res.status(500).send('Erreur lors de la récupération de l\'élève');
         }
-        res.json({ message: `${assignment.nom} saved!`})
-    })
+        Matiere.findById(matiereId, (err, matiere) => {
+            if (err) {
+                return res.status(500).send('Erreur lors de la récupération de la matière');
+            }
+            assignment.auteur = eleve;
+            assignment.matiere = matiere;
+
+            console.log("POST assignment reçu :");
+            console.log(assignment)
+
+            assignment.save( (err) => {
+                if(err){
+                    res.send('cant post assignment ', err);
+                }
+                res.json({ message: `${assignment.nom} saved!`})
+            })
+        });
+    });
 }
 
 // Update d'un assignment (PUT)
