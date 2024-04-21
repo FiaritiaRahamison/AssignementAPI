@@ -55,7 +55,7 @@ async function updateSubject(req, res) {
 }
 
 async function deleteSubject(req, res) {
-    Subject.findByIdAndRemove(re.params.id, (err, subject) => {
+    Subject.findByIdAndRemove(req.params.id, (err, subject) => {
         if(err) res.status(400).send(err);
         res.status(201).json({message: `${subject.name} deleted`})
     })
