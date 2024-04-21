@@ -1,5 +1,6 @@
 let User = require('../model/user');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 //Récupérer tous les users (GET)
 async function getUsers(req, res) {
@@ -74,4 +75,37 @@ async function deteleUser(req, res) {
     })
 }
 
-module.exports = { getUsers, getUser, postUser, updateUser, deteleUser };
+async function loginUser(req, res) {
+    const {login, password} = req.body;
+
+    try {
+        const user = await User.findOne({ login });
+        if(!user) {
+            res.status(400).json({message: 'Utilisateur introuvable'});
+        }
+
+        const isPasswordMatch = await bcrypt.compare(password, user.password);
+        if(!isPasswordMatch) {
+            res.status(400).json({message: 'Mot de passe incorrect'});
+        }
+
+        const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+        res.json({
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                firstname: user.firstname,
+                login: user.login,
+                role: user.role,
+                photo: user.photo,
+            },
+        });
+
+    } catch (err) {
+        res.status(500).json({message: err.message});
+    }
+}
+
+module.exports = { getUsers, getUser, postUser, updateUser, deteleUser, loginUser };

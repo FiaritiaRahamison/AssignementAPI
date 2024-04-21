@@ -7,6 +7,9 @@ let assignment = require('./routes/assignments');
 
 let mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
+
+const dotenv = require('dotenv');
+dotenv.config();
 // mongoose.set('debug', true);
 
 // remplacer toute cette chaine par l'URI de connexion à votre propre base dans le cloud s
@@ -66,6 +69,9 @@ app.route(prefix + '/users')
 app.route(prefix + '/users/:id')
   .get(user.getUser)
   .delete(user.deteleUser);
+
+app.route(prefix + '/users/login')
+  .post(user.loginUser);
 
 // Assignments
 app.route(prefix + '/assignments')
