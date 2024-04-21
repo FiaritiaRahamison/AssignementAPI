@@ -1,6 +1,8 @@
 let express = require('express');
 let app = express();
 let bodyParser = require('body-parser');
+let matiere = require('./routes/matiere');
+let user = require('./routes/user');
 let assignment = require('./routes/assignments');
 
 let mongoose = require('mongoose');
@@ -44,7 +46,24 @@ let port = process.env.PORT || 8010;
 // les routes
 const prefix = '/api';
 
-// http://serveur..../assignments
+// Matières
+app.route(prefix + '/matieres')
+  .post(matiere.postMatiere)
+  .get(matiere.getMatieres);
+
+app.route(prefix + '/matieres/:id')
+  .get(matiere.getMatiere);
+
+
+// User
+app.route(prefix + '/users')
+  .post(user.postUser)
+  .get(user.getUsers);
+
+app.route(prefix + '/users/:id')
+  .get(user.getUser);
+
+// Assignments
 app.route(prefix + '/assignments')
   .post(assignment.postAssignment)
   .put(assignment.updateAssignment)

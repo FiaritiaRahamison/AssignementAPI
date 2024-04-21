@@ -29,8 +29,8 @@ function getUser(req, res) {
 
 function postUser(req, res) {
     let user = new User();
-    matiere.login = req.body.login;
-    matiere.password = req.body.password;
+    user.login = req.body.login;
+    user.password = req.body.password;
 
     console.log("POST user reçu :");
     console.log(user);
