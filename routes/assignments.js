@@ -13,7 +13,7 @@ function getAssignments(req, res){
 }
 */
 
-function getAssignments(req, res){
+async function getAssignments(req, res){
     let aggregateQuery = Assignment.aggregate();
 
     Assignment.aggregatePaginate(
@@ -24,20 +24,20 @@ function getAssignments(req, res){
         },
         (err, data) => {
             if(err){
-                res.send(err)
+                res.status(400).send(err)
             }
     
-            res.send(data);
+            res.status(201).send(data);
         }
     );
 }
 
 // Récupérer un assignment par son id (GET)
-function getAssignment(req, res){
+async function getAssignment(req, res){
     let assignmentId = req.params.id;
     Assignment.findById(assignmentId, (err, assignment) =>{
-        if(err){res.send(err)}
-        res.json(assignment);
+        if(err){res.status(400).json({message: err})}
+        res.status(201).json(assignment);
     })
 
     /*
@@ -74,31 +74,28 @@ async function postAssignment(req, res) {
 };
 
 // Update d'un assignment (PUT)
-function updateAssignment(req, res) {
+async function updateAssignment(req, res) {
     console.log("UPDATE recu assignment : ");
     console.log(req.body);
-    Assignment.findByIdAndUpdate(req.body._id, req.body, {new: true}, (err, assignment) => {
+    Assignment.findByIdAndUpdate(req.params.id, req.body, {new: true}, (err, assignment) => {
         if (err) {
-            console.log(err);
-            res.send(err)
+            res.status(400).send(err)
         } else {
-          res.json({message: `${assignment.nom} updated`, assignment: assignment})
+          res.status(201).json({message: `${assignment.title} updated`, assignment: assignment})
         }
-
-      // console.log('updated ', assignment)
     });
 
 }
 
 // suppression d'un assignment (DELETE)
 // l'id est bien le _id de mongoDB
-function deleteAssignment(req, res) {
+async function deleteAssignment(req, res) {
 
     Assignment.findByIdAndRemove(req.params.id, (err, assignment) => {
         if (err) {
-            res.send(err);
+            res.status(400).send(err);
         }
-        res.json({message: `${assignment.nom} deleted`});
+        res.status(201).json({message: `${assignment.title} deleted`});
     })
 }
 

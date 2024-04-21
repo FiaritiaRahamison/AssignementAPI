@@ -1,6 +1,7 @@
 let User = require('../model/user');
 
-function getUsers(req, res) {
+//Récupérer tous les users (GET)
+async function getUsers(req, res) {
     let aggregateQuery = User.aggregate();
 
     User.aggregatePaginate(
@@ -11,36 +12,62 @@ function getUsers(req, res) {
         },
         (err, data) => {
             if(err){
-                res.send(err)
+                res.status(400).send(err)
             }
     
-            res.send(data);
+            res.status(201).send(data);
         }
     );
 }
 
-function getUser(req, res) {
+//Récupérer un user par son id (GET)
+async function getUser(req, res) {
     let userId = req.params.id;
     User.findById(userId, (err, user) => {
-        if(err){res.send(err)}
-        res.json(user);
+        if(err){res.status(400).send(err)}
+        res.status(201).json(user);
     })
 }
 
-function postUser(req, res) {
-    let user = new User();
-    user.login = req.body.login;
-    user.password = req.body.password;
+//Ajout d'un user (POST)
+async function postUser(req, res) {
+    const newUser = new User({
+        name: req.body.name,
+        firstname: req.body.firstname,
+        login: req.body.login,
+        password: req.body.password,
+        role: req.body.role,
+        photo: req.body.photo,
+    });
 
-    console.log("POST user reçu :");
-    console.log(user);
+    try {
+        const savedUser = await newUser.save();
+        res.status(201).json(savedUser);
+    } catch (err) {
+        res.status(400).json({message: err.message});
+    }
+};
 
-    user.save((err) => {
-        if(err) {
-            res.send('User non enregistrée ', err);
+//Update un user (PUT)
+async function updateUser(req, res) {
+    console.log("UPDATE recu user : ");
+    console.log(req.body);
+    User.findByIdAndUpdate(req.params.id, req.body, {new: true}, (err, user) => {
+        if (err) {
+            res.status(400).send(err);
+        } else {
+            res.status(201).json({message: `${user.name} updated`, user: user})
         }
-        res.json({message: `${user.login} enregistrée!`})
+    });
+}
+
+async function deteleUser(req, res) {
+    User.findByIdAndRemove(req.params.id, (err, user) => {
+        if(err) {
+            res.status(400).send(err);
+        }
+        res.status(201).json({message: `${user.name} deleted`});
     })
 }
 
-module.exports = { getUsers, getUser, postUser };
+module.exports = { getUsers, getUser, postUser, updateUser, deteleUser };
