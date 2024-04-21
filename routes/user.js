@@ -1,4 +1,5 @@
 let User = require('../model/user');
+const bcrypt = require('bcryptjs');
 
 //Récupérer tous les users (GET)
 async function getUsers(req, res) {
@@ -31,11 +32,14 @@ async function getUser(req, res) {
 
 //Ajout d'un user (POST)
 async function postUser(req, res) {
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
+
     const newUser = new User({
         name: req.body.name,
         firstname: req.body.firstname,
         login: req.body.login,
-        password: req.body.password,
+        password: hashedPassword,
         role: req.body.role,
         photo: req.body.photo,
     });

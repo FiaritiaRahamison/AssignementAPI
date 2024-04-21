@@ -7,7 +7,7 @@ let UserSchema = Schema({
     firstname: String,
     login: String,
     password: String,
-    role: Enumerator,
+    role: Number, //1: student, 2: teacher, 3: admin
     photo: String
 });
 

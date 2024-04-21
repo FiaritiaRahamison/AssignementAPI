@@ -8,6 +8,6 @@ let SubjectSchema = Schema({
     teacher: { type: Schema.Types.ObjectId, ref: 'User' }
 });
 
-MatiereSchema.plugin(mongoosePaginate);
+SubjectSchema.plugin(mongoosePaginate);
 
 module.exports = mongoose.model('subject', SubjectSchema);
