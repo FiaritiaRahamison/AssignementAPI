@@ -13,7 +13,7 @@ dotenv.config();
 // mongoose.set('debug', true);
 
 // remplacer toute cette chaine par l'URI de connexion à votre propre base dans le cloud s
-const uri = 'mongodb+srv://fiaritianaliarilalarahamison:mdpprom13@projectassignment.6iht2ej.mongodb.net/?retryWrites=true&w=majority&appName=projectAssignment';
+const uri = 'mongodb+srv://fiaritianaliarilalarahamison:mdpprom13@projectassignment.6iht2ej.mongodb.net/assignmentsMEAN?retryWrites=true&w=majority&appName=projectAssignment';
 
 
 const options = {
