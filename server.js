@@ -4,6 +4,10 @@ let bodyParser = require('body-parser');
 let subject = require('./routes/subject');
 let user = require('./routes/user');
 let assignment = require('./routes/assignments');
+let cors = require('cors');
+
+
+app.use(cors());
 
 let mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
