@@ -14,7 +14,11 @@ function getAssignments(req, res){
 */
 
 async function getAssignments(req, res){
-    let aggregateQuery = Assignment.aggregate();
+    let aggregateQuery = Assignment.aggregate([
+        { $lookup: { from: 'users', localField: 'author', foreignField: '_id', as: 'author' } },
+        { $lookup: { from: 'subjects', localField: 'subject', foreignField: '_id', as: 'subject' } },
+        { $lookup: { from: 'users', localField: 'subject.teacher', foreignField: '_id', as: 'subject.teacher' } }
+    ]);
 
     Assignment.aggregatePaginate(
         aggregateQuery, 
@@ -27,6 +31,18 @@ async function getAssignments(req, res){
                 res.status(400).send(err)
             }
     
+            data.docs.forEach(doc => {
+                if (doc.author && doc.author.length > 0) {
+                    doc.author = doc.author[0];
+                }
+                if (doc.subject && doc.subject.length > 0) {
+                    doc.subject = doc.subject[0];
+                }
+                if (doc.subject.teacher && doc.subject.teacher.length > 0) {
+                    doc.subject.teacher = doc.subject.teacher[0];
+                }
+            });
+
             res.status(201).send(data);
         }
     );
@@ -52,7 +68,7 @@ async function getAssignment(req, res){
 async function postAssignment(req, res) {
     const newAssignment = new Assignment({
       title: req.body.title,
-      creationDate: req.body.creationDate,
+      creationDate: new Date(),
       description: req.body.description,
       subject: req.body.subject,
       author: req.body.author,

@@ -84,12 +84,12 @@ app.route(prefix + '/assignments')
   .put(assignment.updateAssignment)
   .get(assignment.getAssignments);
 
+app.route(prefix + '/assignments/author')
+  .get(assignment.getAssignmentWhereAuthor);
+
 app.route(prefix + '/assignments/:id')
   .get(assignment.getAssignment)
   .delete(assignment.deleteAssignment);
-
-app.route(prefix + '/assignments/author')
-  .get(assignment.getAssignmentWhereAuthor);
 
 
 // On démarre le serveur

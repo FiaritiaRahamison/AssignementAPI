@@ -1,20 +1,30 @@
-const subject = require('../model/subject');
 let Subject = require('../model/subject');
 
 async function getSubjects(req, res){
-    let aggregateQuery = Subject.aggregate();
+
+    let page = parseInt(req.query.page) || 1;
+    let limit = parseInt(req.query.limit) || 10;
+
+    let aggregateQuery = Subject.aggregate([
+        { $lookup: { from: 'users', localField: 'teacher', foreignField: '_id', as: 'teacher' } }
+    ]);
 
     Subject.aggregatePaginate(
         aggregateQuery, 
         {
-            page: parseInt(req.query.page) || 1,
-            limit: parseInt(req.query.limit) || 10
+            page: page,
+            limit: limit
         },
         (err, data) => {
             if(err){
                 res.status(400).send(err)
             }
-    
+            
+            data.docs.forEach(doc => {
+                if (doc.teacher && doc.teacher.length > 0) {
+                    doc.teacher = doc.teacher[0];
+                }
+            });
             res.status(201).send(data);
         }
     );
