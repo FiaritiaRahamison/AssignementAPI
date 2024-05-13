@@ -89,7 +89,7 @@ app.route(prefix + '/assignments/:id')
   .delete(assignment.deleteAssignment);
 
 app.route(prefix + '/assignments/author')
-  .get(assignment.getAssignmentWhereAuthor)
+  .get(assignment.getAssignmentWhereAuthor);
 
 
 // On démarre le serveur
