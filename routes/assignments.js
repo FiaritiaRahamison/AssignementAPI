@@ -100,5 +100,11 @@ async function deleteAssignment(req, res) {
 }
 
 
+async function getAssignmentWhereAuthor(req, res) {
+    let name = req.query.name;
+    let firstname = req.query.firstname;
 
-module.exports = { getAssignments, postAssignment, getAssignment, updateAssignment, deleteAssignment };
+    res.status(200).json({reponse: `${name} ${firstname}`})
+}
+
+module.exports = { getAssignments, postAssignment, getAssignment, updateAssignment, deleteAssignment, getAssignmentWhereAuthor };

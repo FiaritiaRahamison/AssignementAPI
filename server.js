@@ -88,6 +88,9 @@ app.route(prefix + '/assignments/:id')
   .get(assignment.getAssignment)
   .delete(assignment.deleteAssignment);
 
+app.route(prefix + '/assignments/author')
+  .get(assignment.getAssignmentWhereAuthor)
+
 
 // On démarre le serveur
 app.listen(port, "0.0.0.0");
