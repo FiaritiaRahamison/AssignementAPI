@@ -1,4 +1,5 @@
 let Assignment = require('../model/assignment');
+const subject = require('../model/subject');
 
 // Récupérer tous les assignments (GET)
 /*
@@ -123,7 +124,24 @@ async function getAssignmentWhereAuthorAndIsDoneFalse(req, res) {
     let aggregateQuery = Assignment.aggregate([
         { $lookup: { from: 'users', localField: 'author', foreignField: '_id', as: 'author' } },
         { $lookup: { from: 'subjects', localField: 'subject', foreignField: '_id', as: 'subject' } },
-        { $lookup: { from: 'users', localField: 'subject.teacher', foreignField: '_id', as: 'subject.teacher' } },
+        { $lookup: { from: 'users', localField: 'subject.teacher', foreignField: '_id', as: 'teacherDetails' } },
+        {
+            $project: {
+              title: 1,
+              creationDate: 1,
+              description: 1,
+              author: 1,
+              isDone: 1,
+              isMark: 1,
+              deadline: 1,
+              subject: {
+                _id: 1,
+                name: 1,
+                __v: 1,
+                teacher: '$subject.teacher'
+              }
+            }
+        },
         { $match: { "author.name": name, "author.firstname": firstname, "isDone": false } }
     ]);
 
@@ -145,8 +163,8 @@ async function getAssignmentWhereAuthorAndIsDoneFalse(req, res) {
                 if (doc.subject && doc.subject.length > 0) {
                     doc.subject = doc.subject[0];
                 }
-                if (doc.subject.teacher && doc.subject.teacher.length > 0) {
-                    doc.subject.teacher = doc.subject.teacher[0];
+                if (doc.teacherDetails && doc.teacherDetails.length > 0) {
+                    doc.subject.teacher = doc.teacherDetails[0];
                 }
             });
 
@@ -163,6 +181,23 @@ async function getAssignmentWhereAuthorAndIsMarkFalse(req, res) {
         { $lookup: { from: 'users', localField: 'author', foreignField: '_id', as: 'author' } },
         { $lookup: { from: 'subjects', localField: 'subject', foreignField: '_id', as: 'subject' } },
         { $lookup: { from: 'users', localField: 'subject.teacher', foreignField: '_id', as: 'subject.teacher' } },
+        {
+            $project: {
+              title: 1,
+              creationDate: 1,
+              description: 1,
+              author: 1,
+              isDone: 1,
+              isMark: 1,
+              deadline: 1,
+              subject: {
+                _id: 1,
+                name: 1,
+                __v: 1,
+                teacher: '$subject.teacher'
+              }
+            }
+        },
         { $match: { "author.name": name, "author.firstname": firstname, "isDone": true, "isMark": false } }
     ]);
 
@@ -202,6 +237,23 @@ async function getAssignmentWhereAuthorAndIsMarkTrue(req, res) {
         { $lookup: { from: 'users', localField: 'author', foreignField: '_id', as: 'author' } },
         { $lookup: { from: 'subjects', localField: 'subject', foreignField: '_id', as: 'subject' } },
         { $lookup: { from: 'users', localField: 'subject.teacher', foreignField: '_id', as: 'subject.teacher' } },
+        {
+            $project: {
+              title: 1,
+              creationDate: 1,
+              description: 1,
+              author: 1,
+              isDone: 1,
+              isMark: 1,
+              deadline: 1,
+              subject: {
+                _id: 1,
+                name: 1,
+                __v: 1,
+                teacher: '$subject.teacher'
+              }
+            }
+        },
         { $match: { "author.name": name, "author.firstname": firstname, "isMark": true } }
     ]);
 
