@@ -138,7 +138,7 @@ async function getAssignmentWhereAuthorAndIsDoneFalse(req, res) {
                 _id: 1,
                 name: 1,
                 __v: 1,
-                teacher: '$subject.teacher'
+                teacher: { $arrayElemAt: ['$teacherDetails', 0] }
               }
             }
         },
@@ -163,9 +163,6 @@ async function getAssignmentWhereAuthorAndIsDoneFalse(req, res) {
                 if (doc.subject && doc.subject.length > 0) {
                     doc.subject = doc.subject[0];
                 }
-                if (doc.teacherDetails && doc.teacherDetails.length > 0) {
-                    doc.subject.teacher = doc.teacherDetails[0];
-                }
             });
 
             res.status(201).send(data);
@@ -180,7 +177,7 @@ async function getAssignmentWhereAuthorAndIsMarkFalse(req, res) {
     let aggregateQuery = Assignment.aggregate([
         { $lookup: { from: 'users', localField: 'author', foreignField: '_id', as: 'author' } },
         { $lookup: { from: 'subjects', localField: 'subject', foreignField: '_id', as: 'subject' } },
-        { $lookup: { from: 'users', localField: 'subject.teacher', foreignField: '_id', as: 'subject.teacher' } },
+        { $lookup: { from: 'users', localField: 'subject.teacher', foreignField: '_id', as: 'teacherDetails' } },
         {
             $project: {
               title: 1,
@@ -194,7 +191,7 @@ async function getAssignmentWhereAuthorAndIsMarkFalse(req, res) {
                 _id: 1,
                 name: 1,
                 __v: 1,
-                teacher: '$subject.teacher'
+                teacher: { $arrayElemAt: ['$teacherDetails', 0] }
               }
             }
         },
@@ -219,9 +216,6 @@ async function getAssignmentWhereAuthorAndIsMarkFalse(req, res) {
                 if (doc.subject && doc.subject.length > 0) {
                     doc.subject = doc.subject[0];
                 }
-                if (doc.subject.teacher && doc.subject.teacher.length > 0) {
-                    doc.subject.teacher = doc.subject.teacher[0];
-                }
             });
 
             res.status(201).send(data);
@@ -236,7 +230,7 @@ async function getAssignmentWhereAuthorAndIsMarkTrue(req, res) {
     let aggregateQuery = Assignment.aggregate([
         { $lookup: { from: 'users', localField: 'author', foreignField: '_id', as: 'author' } },
         { $lookup: { from: 'subjects', localField: 'subject', foreignField: '_id', as: 'subject' } },
-        { $lookup: { from: 'users', localField: 'subject.teacher', foreignField: '_id', as: 'subject.teacher' } },
+        { $lookup: { from: 'users', localField: 'subject.teacher', foreignField: '_id', as: 'teacherDetails' } },
         {
             $project: {
               title: 1,
@@ -250,7 +244,7 @@ async function getAssignmentWhereAuthorAndIsMarkTrue(req, res) {
                 _id: 1,
                 name: 1,
                 __v: 1,
-                teacher: '$subject.teacher'
+                teacher: { $arrayElemAt: ['$teacherDetails', 0] }
               }
             }
         },
@@ -274,9 +268,6 @@ async function getAssignmentWhereAuthorAndIsMarkTrue(req, res) {
                 }
                 if (doc.subject && doc.subject.length > 0) {
                     doc.subject = doc.subject[0];
-                }
-                if (doc.subject.teacher && doc.subject.teacher.length > 0) {
-                    doc.subject.teacher = doc.subject.teacher[0];
                 }
             });
 
