@@ -84,8 +84,14 @@ app.route(prefix + '/assignments')
   .put(assignment.updateAssignment)
   .get(assignment.getAssignments);
 
-app.route(prefix + '/assignments/author')
-  .get(assignment.getAssignmentWhereAuthor);
+app.route(prefix + '/assignments/author/notDone')
+  .get(assignment.getAssignmentWhereAuthorAndIsDoneFalse);
+
+app.route(prefix + '/assignments/author/isDoneNotMarked')
+  .get(assignment.getAssignmentWhereAuthorAndIsMarkFalse);
+
+app.route(prefix + '/assignments/author/isMarked')
+  .get(assignment.getAssignmentWhereAuthorAndIsMarkTrue);
 
 app.route(prefix + '/assignments/:id')
   .get(assignment.getAssignment)
