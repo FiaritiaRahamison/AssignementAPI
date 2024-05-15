@@ -276,5 +276,124 @@ async function getAssignmentWhereAuthorAndIsMarkTrue(req, res) {
     );
 }
 
+async function getAssignmentWhereTeacherAndIsNotMarked(req, res) {
+    let name = req.query.name;
+    let firstname = req.query.firstname;
+
+    let aggregateQuery = Assignment.aggregate([
+        { $lookup: { from: 'users', localField: 'author', foreignField: '_id', as: 'author' } },
+        { $lookup: { from: 'subjects', localField: 'subject', foreignField: '_id', as: 'subject' } },
+        { $lookup: { from: 'users', localField: 'subject.teacher', foreignField: '_id', as: 'teacherDetails' } },
+        {
+            $project: {
+              title: 1,
+              creationDate: 1,
+              description: 1,
+              author: 1,
+              isDone: 1,
+              isMark: 1,
+              deadline: 1,
+              subject: {
+                _id: 1,
+                name: 1,
+                __v: 1,
+                teacher: { $arrayElemAt: ['$teacherDetails', 0] }
+              }
+            }
+        },
+        { $unwind: "$subject" }, // Ajoutez cette étape pour déconstruire le tableau subject
+        { $match: { 
+            "subject.teacher.name": name,
+            "subject.teacher.firstname": firstname,
+            "isDone": true,
+            "isMark": false
+        } }
+    ]);
+
+    Assignment.aggregatePaginate(
+        aggregateQuery, 
+        {
+            page: parseInt(req.query.page) || 1,
+            limit: parseInt(req.query.limit) || 10
+        },
+        (err, data) => {
+            if(err){
+                res.status(400).send(err)
+            }
+    
+            data.docs.forEach(doc => {
+                if (doc.author && doc.author.length > 0) {
+                    doc.author = doc.author[0];
+                }
+                if (doc.subject && doc.subject.length > 0) {
+                    doc.subject = doc.subject[0];
+                }
+            });
+
+            res.status(201).send(data);
+        }
+    );
+}
+
+async function getAssignmentWhereTeacherAndIsMarked(req, res) {
+    let name = req.query.name;
+    let firstname = req.query.firstname;
+
+    let aggregateQuery = Assignment.aggregate([
+        { $lookup: { from: 'users', localField: 'author', foreignField: '_id', as: 'author' } },
+        { $lookup: { from: 'subjects', localField: 'subject', foreignField: '_id', as: 'subject' } },
+        { $lookup: { from: 'users', localField: 'subject.teacher', foreignField: '_id', as: 'teacherDetails' } },
+        {
+            $project: {
+              title: 1,
+              creationDate: 1,
+              description: 1,
+              author: 1,
+              isDone: 1,
+              isMark: 1,
+              deadline: 1,
+              subject: {
+                _id: 1,
+                name: 1,
+                __v: 1,
+                teacher: { $arrayElemAt: ['$teacherDetails', 0] }
+              }
+            }
+        },
+        { $unwind: "$subject" }, // Ajoutez cette étape pour déconstruire le tableau subject
+        { $match: { 
+            "subject.teacher.name": name,
+            "subject.teacher.firstname": firstname,
+            "isDone": true,
+            "isMark": true
+        } }
+    ]);
+
+    Assignment.aggregatePaginate(
+        aggregateQuery, 
+        {
+            page: parseInt(req.query.page) || 1,
+            limit: parseInt(req.query.limit) || 10
+        },
+        (err, data) => {
+            if(err){
+                res.status(400).send(err)
+            }
+    
+            data.docs.forEach(doc => {
+                if (doc.author && doc.author.length > 0) {
+                    doc.author = doc.author[0];
+                }
+                if (doc.subject && doc.subject.length > 0) {
+                    doc.subject = doc.subject[0];
+                }
+            });
+
+            res.status(201).send(data);
+        }
+    );
+}
+
 module.exports = { getAssignments, postAssignment, getAssignment, updateAssignment, deleteAssignment,
-                getAssignmentWhereAuthorAndIsDoneFalse, getAssignmentWhereAuthorAndIsMarkFalse, getAssignmentWhereAuthorAndIsMarkTrue };
+                getAssignmentWhereAuthorAndIsDoneFalse, getAssignmentWhereAuthorAndIsMarkFalse, getAssignmentWhereAuthorAndIsMarkTrue,
+                getAssignmentWhereTeacherAndIsNotMarked, getAssignmentWhereTeacherAndIsMarked };

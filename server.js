@@ -92,6 +92,12 @@ app.route(prefix + '/assignments/author/isDoneNotMarked')
 app.route(prefix + '/assignments/author/isMarked')
   .get(assignment.getAssignmentWhereAuthorAndIsMarkTrue);
 
+app.route(prefix + '/assignments/teacher/isNotMarked')
+  .get(assignment.getAssignmentWhereTeacherAndIsNotMarked);
+
+app.route(prefix + '/assignments/teacher/isMarked')
+  .get(assignment.getAssignmentWhereTeacherAndIsMarked);
+
 app.route(prefix + '/assignments/:id')
   .get(assignment.getAssignment)
   .put(assignment.updateAssignment)
