@@ -81,7 +81,6 @@ app.route(prefix + '/users/login')
 // Assignments
 app.route(prefix + '/assignments')
   .post(assignment.postAssignment)
-  .put(assignment.updateAssignment)
   .get(assignment.getAssignments);
 
 app.route(prefix + '/assignments/author/notDone')
@@ -95,6 +94,7 @@ app.route(prefix + '/assignments/author/isMarked')
 
 app.route(prefix + '/assignments/:id')
   .get(assignment.getAssignment)
+  .put(assignment.updateAssignment)
   .delete(assignment.deleteAssignment);
 
 
