@@ -1,5 +1,6 @@
 let Assignment = require('../model/assignment');
-const subject = require('../model/subject');
+let Subject = require('../model/subject');
+let User = require('../model/user');
 
 // Récupérer tous les assignments (GET)
 /*
@@ -52,17 +53,32 @@ async function getAssignments(req, res){
 // Récupérer un assignment par son id (GET)
 async function getAssignment(req, res){
     let assignmentId = req.params.id;
-    Assignment.findById(assignmentId, (err, assignment) =>{
-        if(err){res.status(400).json({message: err})}
-        res.status(201).json(assignment);
-    })
+    try {
+        const assignment = await Assignment.findById(assignmentId);
+    
+        if (!assignment) {
+          return res.status(404).json({ message: 'Assignment not found' });
+        }
 
-    /*
-    Assignment.findOne({id: assignmentId}, (err, assignment) =>{
-        if(err){res.send(err)}
-        res.json(assignment);
-    })
-    */
+        const subject = await Subject.findById(assignment.subject);
+
+        const author = await User.findById(assignment.author);
+    
+        const teacher = await User.findById(subject.teacher);
+
+        const response = {
+          ...assignment._doc,
+          subject: {
+            ...subject._doc,
+            teacher: teacher._doc
+          },
+          author: author._doc
+        };
+    
+        res.status(200).json(response);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
 }
 
 // Ajout d'un assignment (POST)
