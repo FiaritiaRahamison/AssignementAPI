@@ -19,7 +19,24 @@ async function getAssignments(req, res){
     let aggregateQuery = Assignment.aggregate([
         { $lookup: { from: 'users', localField: 'author', foreignField: '_id', as: 'author' } },
         { $lookup: { from: 'subjects', localField: 'subject', foreignField: '_id', as: 'subject' } },
-        { $lookup: { from: 'users', localField: 'subject.teacher', foreignField: '_id', as: 'subject.teacher' } }
+        { $lookup: { from: 'users', localField: 'subject.teacher', foreignField: '_id', as: 'teacherDetails' } },
+        {
+            $project: {
+              title: 1,
+              creationDate: 1,
+              description: 1,
+              author: 1,
+              isDone: 1,
+              isMark: 1,
+              deadline: 1,
+              subject: {
+                _id: 1,
+                name: 1,
+                __v: 1,
+                teacher: { $arrayElemAt: ['$teacherDetails', 0] }
+              }
+            }
+        }
     ]);
 
     Assignment.aggregatePaginate(
@@ -317,7 +334,7 @@ async function getAssignmentWhereTeacherAndIsNotMarked(req, res) {
               }
             }
         },
-        { $unwind: "$subject" }, // Ajoutez cette étape pour déconstruire le tableau subject
+        { $unwind: "$subject" },
         { $match: { 
             "subject.teacher.name": name,
             "subject.teacher.firstname": firstname,
@@ -376,7 +393,7 @@ async function getAssignmentWhereTeacherAndIsMarked(req, res) {
               }
             }
         },
-        { $unwind: "$subject" }, // Ajoutez cette étape pour déconstruire le tableau subject
+        { $unwind: "$subject" },
         { $match: { 
             "subject.teacher.name": name,
             "subject.teacher.firstname": firstname,
