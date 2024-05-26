@@ -1,4 +1,4 @@
-let Subject = require('../model/subject');
+const {SubjectModel:Subject} = require('../model/subject');
 
 async function getSubjects(req, res){
 

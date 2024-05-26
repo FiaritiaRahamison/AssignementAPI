@@ -1,16 +1,24 @@
-let mongoose = require('mongoose');
-let Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 const mongoosePaginate = require('mongoose-aggregate-paginate-v2');
+const ROLES = require('../utils/enums');
 
-let UserSchema = Schema({
-    name: String,
-    firstname: String,
-    login: String,
-    password: String,
-    role: Number, //1: student, 2: teacher, 3: admin
+const UserSchema = Schema({
+    name: {type:String ,required : true},
+    firstname: {type:String ,required : true},
+    login: {type:String ,required : true, unique :true},
+    password: {type:String ,required : true},
+    role: {
+        type :Number, 
+        enum :[ROLES.admin,ROLES.student,ROLES.teacher],
+        required : true
+    }, //1: student, 2: teacher, 3: admin
     photo: String
 });
 
 UserSchema.plugin(mongoosePaginate);
 
-module.exports = mongoose.model('user', UserSchema);
+const UserModel = mongoose.model('user', UserSchema);
+
+
+module.exports = { UserModel,UserSchema};

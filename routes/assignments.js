@@ -1,6 +1,6 @@
-let Assignment = require('../model/assignment');
-let Subject = require('../model/subject');
-let User = require('../model/user');
+const {AssignmentModel:Assignment} = require('../model/assignment');
+const {SubjectModel:Subject} = require('../model/subject');
+const {UserModel:User} = require('../model/user');
 
 // Récupérer tous les assignments (GET)
 /*

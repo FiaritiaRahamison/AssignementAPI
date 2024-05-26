@@ -1,13 +1,16 @@
-let mongoose = require('mongoose');
-let Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 const mongoosePaginate = require('mongoose-aggregate-paginate-v2');
+const { UserSchema } = require('./user');
 
-let SubjectSchema = Schema({
+const SubjectSchema = Schema({
     name: String,
     photo: String,
-    teacher: { type: Schema.Types.ObjectId, ref: 'User' }
+    teacher: { type : UserSchema }
 });
 
 SubjectSchema.plugin(mongoosePaginate);
 
-module.exports = mongoose.model('subject', SubjectSchema);
+const SubjectModel =  mongoose.model('subject', SubjectSchema); 
+
+module.exports = { SubjectModel, SubjectSchema }

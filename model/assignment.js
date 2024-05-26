@@ -1,20 +1,31 @@
-let mongoose = require('mongoose');
-let Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 const mongoosePaginate = require('mongoose-aggregate-paginate-v2');
 
-let AssignmentSchema = Schema({
+const { SubjectSchema } = require('./subject');
+const { UserSchema } = require('./user');
+
+const AssignementResultSchema = Schema({
+    assignementId : {type : String , required : true},
+    author : {type : UserSchema},
+    link : {type : String , default : ''},
+    dateDone : {type: Date , default : Date.now},
+    mark :{type : Number , default : 0},
+    remark : String,
+    isMarked : {type : Boolean , default : false},
+    dateMarked : Date
+});
+
+const AssignementResultModel = mongoose.model('AssignementResult',AssignementResultSchema);
+
+const AssignmentSchema = Schema({
     title: String,
     creationDate: Date,
     description: String,
-    subject: { type: Schema.Types.ObjectId, ref: 'Subject' },
-    author: { type: Schema.Types.ObjectId, ref: 'User' },
-    isDone: Boolean,
-    dateDone: Date,
-    isMark: Boolean,
-    mark: Number,
-    remark: String,
+    subject: { type: SubjectSchema },
     deadline: Date,
-    link: String
+    link: String,
+    results : { type : [AssignementResultSchema] , default :[]}
 });
 
 AssignmentSchema.plugin(mongoosePaginate);
@@ -22,4 +33,7 @@ AssignmentSchema.plugin(mongoosePaginate);
 // C'est à travers ce modèle Mongoose qu'on pourra faire le CRUD
 // assignment est le nom de la collection dans la base de données
 // Mongoose tolère certaines erreurs dans le nom (ex: Assignent au lieu de assignments)
-module.exports = mongoose.model('assignment', AssignmentSchema);
+
+const AssignmentModel = mongoose.model('assignment', AssignmentSchema); 
+
+module.exports = {AssignementResultModel,AssignementResultSchema,AssignmentModel,AssignmentSchema};
