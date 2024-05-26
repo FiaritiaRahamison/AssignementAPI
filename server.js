@@ -68,12 +68,12 @@ app.route(prefix + '/subjects/:id')
 // User
 app.route(prefix + '/users')
   .post(user.postUser)
-  .get(user.getUsers)
-  .put(user.updateUser);
+  .get(user.getUsers);
 
 app.route(prefix + '/users/:id')
   .get(user.getUser)
-  .delete(user.deteleUser);
+  .delete(user.deteleUser)
+  .put(user.updateUser);
 
 app.route(prefix + '/users/login')
   .post(user.loginUser);

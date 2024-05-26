@@ -2,6 +2,7 @@ const { UserModel:User } = require('../model/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const responde = require('../utils/generalResponse');
+const generateToken = require('../utils/jwt');
 
 //Récupérer tous les users (GET)
 async function getUsers(req, res) {
@@ -15,10 +16,11 @@ async function getUsers(req, res) {
         },
         (err, data) => {
             if(err){
-                res.status(400).send(err)
+                console.log(err);
+                res.status(400).json(responde({},err.message));
+            }else{
+                res.status(200).json(responde(data));
             }
-    
-            res.status(201).send(data);
         }
     );
 }
@@ -27,8 +29,8 @@ async function getUsers(req, res) {
 async function getUser(req, res) {
     let userId = req.params.id;
     User.findById(userId, (err, user) => {
-        if(err){res.status(400).send(err)}
-        res.status(201).json(user);
+        if(err) res.status(400).json(responde({},err.message))
+        else res.status(200).json(responde(user));
     })
 }
 
@@ -48,9 +50,10 @@ async function postUser(req, res) {
 
     try {
         const savedUser = await newUser.save();
-        res.status(201).json(savedUser);
+        res.status(201).json(responde(savedUser));
     } catch (err) {
-        res.status(400).json({message: err.message});
+        console.log(err);
+        res.status(400).json(responde({},err.message));
     }
 };
 
@@ -60,9 +63,9 @@ async function updateUser(req, res) {
     console.log(req.body);
     User.findByIdAndUpdate(req.params.id, req.body, {new: true}, (err, user) => {
         if (err) {
-            res.status(400).send(err);
+            res.status(400).send(responde({},err.message));
         } else {
-            res.status(201).json({message: `${user.name} updated`, user: user})
+            res.status(201).json(responde(user,`${user.name} updated`));
         }
     });
 }
@@ -90,7 +93,7 @@ async function loginUser(req, res) {
             res.status(400).json(responde({},'Mot de passe incorrect'));
         }
 
-        const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, { expiresIn: '7d' });
+        const token = generateToken({id : user._id});
 
 
         res.json(responde({
