@@ -1,19 +1,20 @@
-let express = require('express');
-let app = express();
-let bodyParser = require('body-parser');
-let subject = require('./routes/subject');
-let user = require('./routes/user');
-let assignment = require('./routes/assignments');
-let cors = require('cors');
+const dotenv = require('dotenv');
+dotenv.config();
+const express = require('express');
+const app = express();
+const bodyParser = require('body-parser');
+const subject = require('./routes/subject');
+const user = require('./routes/user');
+const assignment = require('./routes/assignments');
+const cors = require('cors');
+const { auth, setupPassport } = require('./utils/passport');
 
 
 app.use(cors());
 
-let mongoose = require('mongoose');
+const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 
-const dotenv = require('dotenv');
-dotenv.config();
 // mongoose.set('debug', true);
 
 // remplacer toute cette chaine par l'URI de connexion à votre propre base dans le cloud s
@@ -54,11 +55,14 @@ let port = process.env.PORT || 8010;
 // les routes
 const prefix = '/api';
 
+//initialiser passport pour la gestion de token
+setupPassport();
+
 // Subject
 app.route(prefix + '/subjects')
-  .post(subject.postSubject)
-  .get(subject.getSubjects)
-  .put(subject.updateSubject);
+  .post(auth,subject.postSubject)
+  .get(auth,subject.getSubjects)
+  .put(auth,subject.updateSubject);
 
 app.route(prefix + '/subjects/:id')
   .get(subject.getSubject)
@@ -77,6 +81,9 @@ app.route(prefix + '/users/:id')
 
 app.route(prefix + '/users/login')
   .post(user.loginUser);
+
+app.route(prefix + '/teachers')
+  .get(user.getTeachers);
 
 // Assignments
 app.route(prefix + '/assignments')

@@ -4,9 +4,9 @@ const mongoosePaginate = require('mongoose-aggregate-paginate-v2');
 const { UserSchema } = require('./user');
 
 const SubjectSchema = Schema({
-    name: String,
+    name: {type : String, required : true},
     photo: String,
-    teacher: { type : UserSchema }
+    teacher: { type : UserSchema, required :true }
 });
 
 SubjectSchema.plugin(mongoosePaginate);

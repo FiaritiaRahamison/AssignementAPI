@@ -6,7 +6,7 @@ const ROLES = require('../utils/enums');
 const UserSchema = Schema({
     name: {type:String ,required : true},
     firstname: {type:String ,required : true},
-    login: {type:String ,required : true, unique :true},
+    login: {type:String ,required : true},
     password: {type:String ,required : true},
     role: {
         type :Number, 

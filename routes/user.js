@@ -3,6 +3,31 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const responde = require('../utils/generalResponse');
 const generateToken = require('../utils/jwt');
+const ROLES = require('../utils/enums');
+
+const getTeachers = async (req,res) =>{
+    let aggregateQuery = User.aggregate([{
+        $match :{
+            role : ROLES.teacher
+        }
+    }]);
+
+    User.aggregatePaginate(
+        aggregateQuery,
+        {
+            page: parseInt(req.query.page) || 1,
+            limit: parseInt(req.query.limit) || 100
+        },
+        (err, data) => {
+            if(err){
+                console.log(err);
+                res.status(400).json(responde({},err.message));
+            }else{
+                res.status(200).json(responde(data));
+            }
+        }
+    );
+}
 
 //Récupérer tous les users (GET)
 async function getUsers(req, res) {
@@ -29,26 +54,34 @@ async function getUsers(req, res) {
 async function getUser(req, res) {
     let userId = req.params.id;
     User.findById(userId, (err, user) => {
-        if(err) res.status(400).json(responde({},err.message))
+        if(err){
+            console.log(err)
+            res.status(400).json(responde({},err.message))
+        } 
         else res.status(200).json(responde(user));
     })
 }
 
 //Ajout d'un user (POST)
 async function postUser(req, res) {
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(req.body.password, salt);
-
-    const newUser = new User({
-        name: req.body.name,
-        firstname: req.body.firstname,
-        login: req.body.login,
-        password: hashedPassword,
-        role: req.body.role,
-        photo: req.body.photo,
-    });
-
     try {
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(req.body.password, salt);
+    
+        const dupUser = await User.findOne({login: req.body.login});
+        if(dupUser){
+            throw new Error("Login invalide");
+        }
+
+        const newUser = new User({
+            name: req.body.name,
+            firstname: req.body.firstname,
+            login: req.body.login,
+            password: hashedPassword,
+            role: req.body.role,
+            photo: req.body.photo,
+        });
+
         const savedUser = await newUser.save();
         res.status(201).json(responde(savedUser));
     } catch (err) {
@@ -63,6 +96,7 @@ async function updateUser(req, res) {
     console.log(req.body);
     User.findByIdAndUpdate(req.params.id, req.body, {new: true}, (err, user) => {
         if (err) {
+            console.log(err)
             res.status(400).send(responde({},err.message));
         } else {
             res.status(201).json(responde(user,`${user.name} updated`));
@@ -73,6 +107,7 @@ async function updateUser(req, res) {
 async function deteleUser(req, res) {
     User.findByIdAndRemove(req.params.id, (err, user) => {
         if(err) {
+            console.log(err)
             res.status(400).send(err);
         }
         res.status(201).json({message: `${user.name} deleted`});
@@ -109,8 +144,9 @@ async function loginUser(req, res) {
         }));
 
     } catch (err) {
+        console.log(err)
         res.status(400).json(responde({},err.message));
     }
 }
 
-module.exports = { getUsers, getUser, postUser, updateUser, deteleUser, loginUser };
+module.exports = { getUsers, getUser, postUser, updateUser, deteleUser, loginUser , getTeachers};

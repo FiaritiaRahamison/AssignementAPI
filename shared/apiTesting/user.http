@@ -11,6 +11,10 @@ content-type: application/json
 GET http://localhost:8010/api/users
 
 ###
+
+GET http://localhost:8010/api/teachers
+
+###
 GET http://localhost:8010/api/users/664c41fcec047300445f9782
 
 ###
