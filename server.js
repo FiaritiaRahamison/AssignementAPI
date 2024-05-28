@@ -13,6 +13,8 @@ const { auth, setupPassport } = require('./utils/passport');
 app.use(cors());
 
 const mongoose = require('mongoose');
+const { check } = require('./utils/jwt');
+const ROLES = require('./utils/enums');
 mongoose.Promise = global.Promise;
 
 // mongoose.set('debug', true);
@@ -60,55 +62,53 @@ setupPassport();
 
 // Subject
 app.route(prefix + '/subjects')
-  .post(auth,subject.postSubject)
-  .get(auth,subject.getSubjects)
-  .put(auth,subject.updateSubject);
+  .post(auth,check(ROLES.admin),subject.postSubject)
+  .get(auth,check(ROLES.admin,ROLES.teacher),subject.getSubjects)
+  .put(auth,check(ROLES.admin),subject.updateSubject);
 
 app.route(prefix + '/subjects/:id')
-  .get(subject.getSubject)
-  .delete(subject.deleteSubject);
+  .get(auth,subject.getSubject)
+  .delete(auth,check(ROLES.admin),subject.deleteSubject);
 
 
 // User
 app.route(prefix + '/users')
-  .post(user.postUser)
-  .get(user.getUsers);
+  .post(auth,check(ROLES.admin),user.postUser)
+  .get(auth,check(ROLES.admin,ROLES.teacher),user.getUsers);
 
 app.route(prefix + '/users/:id')
-  .get(user.getUser)
-  .delete(user.deteleUser)
-  .put(user.updateUser);
+  .get(auth,user.getUser)
+  .delete(auth,check(ROLES.admin),user.deteleUser)
+  .put(auth,check(ROLES.admin),user.updateUser);
 
 app.route(prefix + '/users/login')
   .post(user.loginUser);
 
 app.route(prefix + '/teachers')
-  .get(user.getTeachers);
+  .get(auth,check(ROLES.admin),user.getTeachers);
 
 // Assignments
 app.route(prefix + '/assignments')
-  .post(assignment.postAssignment)
-  .get(assignment.getAssignments);
+.post(auth,check(ROLES.teacher),assignment.postAssignment)
+.get(auth,assignment.getAssignments);
 
-app.route(prefix + '/assignments/author/notDone')
-  .get(assignment.getAssignmentWhereAuthorAndIsDoneFalse);
+app.route(prefix + '/assignments/done')
+  .get(auth,check(ROLES.teacher,ROLES.student),assignment.getAssignmentsDone);
 
-app.route(prefix + '/assignments/author/isDoneNotMarked')
-  .get(assignment.getAssignmentWhereAuthorAndIsMarkFalse);
+app.route(prefix + '/assignments/toDo')
+  .get(auth,check(ROLES.student),assignment.getAssignmentsToDo);
 
-app.route(prefix + '/assignments/author/isMarked')
-  .get(assignment.getAssignmentWhereAuthorAndIsMarkTrue);
+app.route(prefix + '/assignments/marked')
+  .get(auth,check(ROLES.student,ROLES.teacher),assignment.getAssignmentsMarked);
 
-app.route(prefix + '/assignments/teacher/isNotMarked')
-  .get(assignment.getAssignmentWhereTeacherAndIsNotMarked);
+app.route(prefix + '/assignments/result/:id')
+  .post(auth,check(ROLES.teacher),assignment.addNote);
 
-app.route(prefix + '/assignments/teacher/isMarked')
-  .get(assignment.getAssignmentWhereTeacherAndIsMarked);
-
-app.route(prefix + '/assignments/:id')
-  .get(assignment.getAssignment)
-  .put(assignment.updateAssignment)
-  .delete(assignment.deleteAssignment);
+app.route(prefix + '/assignment/:id')
+  .post(auth,check(ROLES.student),assignment.addResult)
+  .get(auth,assignment.getAssignment)
+  .put(auth,check(ROLES.teacher),assignment.updateAssignment)
+  .delete(auth,check(ROLES.teacher),assignment.deleteAssignment);
 
 
 // On démarre le serveur

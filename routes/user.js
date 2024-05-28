@@ -2,7 +2,7 @@ const { UserModel:User } = require('../model/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const responde = require('../utils/generalResponse');
-const generateToken = require('../utils/jwt');
+const {generateToken} = require('../utils/jwt');
 const ROLES = require('../utils/enums');
 
 const getTeachers = async (req,res) =>{

@@ -1,10 +1,46 @@
 POST http://localhost:8010/api/assignments
 content-type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NDIwMzc1MjEyMjA4NmZlMDA4OGIyNyIsImlhdCI6MTcxNjkxNDg0MCwiZXhwIjoxNzE3NTE5NjQwfQ.e7bskONPSWks1nTUZ6OYtXES6chmxy0jBX564xXcCZw
 
 {
-    "title": "Maths homework",
-    "description" : "easy homework",
+    "title": "Easy homework",
+    "description" : "Okayyy homework",
     "subject" : "6654a1941db411355071b8b2",
-    "deadline": "2024-05-30T21:00:00.000+00:00",
+    "deadline": "2024-06-30T21:00:00.000+00:00",
     "link": ""
+}
+
+###
+
+GET http://localhost:8010/api/assignments
+content-type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NDIwMzc1MjEyMjA4NmZlMDA4OGIyNyIsImlhdCI6MTcxNjkxNDg0MCwiZXhwIjoxNzE3NTE5NjQwfQ.e7bskONPSWks1nTUZ6OYtXES6chmxy0jBX564xXcCZw
+
+###
+
+GET http://localhost:8010/api/assignments/done
+content-type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NDIwMzc1MjEyMjA4NmZlMDA4OGIyNyIsImlhdCI6MTcxNjkxNDg0MCwiZXhwIjoxNzE3NTE5NjQwfQ.e7bskONPSWks1nTUZ6OYtXES6chmxy0jBX564xXcCZw
+
+###
+
+GET http://localhost:8010/api/assignments/toDo
+content-type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NTYxNDE3NTVjYWIyMDM1NGM3OTRlMiIsImlhdCI6MTcxNjkxNzM4NCwiZXhwIjoxNzE3NTIyMTg0fQ.ECYbS7aToJ6G6WFagfcYTyo5D_ek8RPOj3gqIJN7ZEE
+
+###
+
+POST http://localhost:8010/api/assignment/66560adfe1c0fd4e5c78fb7f
+content-type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NTYxNDE3NTVjYWIyMDM1NGM3OTRlMiIsImlhdCI6MTcxNjkxNzM4NCwiZXhwIjoxNzE3NTIyMTg0fQ.ECYbS7aToJ6G6WFagfcYTyo5D_ek8RPOj3gqIJN7ZEE
+
+###
+
+POST http://localhost:8010/api/assignments/result/665614be8fd26b48d4651b8b
+content-type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NDIwMzc1MjEyMjA4NmZlMDA4OGIyNyIsImlhdCI6MTcxNjkxNDg0MCwiZXhwIjoxNzE3NTE5NjQwfQ.e7bskONPSWks1nTUZ6OYtXES6chmxy0jBX564xXcCZw
+
+{
+    "mark": 14,
+    "remark": "mety io my nigga"
 }

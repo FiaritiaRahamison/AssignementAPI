@@ -1,6 +1,8 @@
-const {AssignmentModel:Assignment} = require('../model/assignment');
+const mongoose = require('mongoose');
+const {AssignmentModel:Assignment,AssignmentResultModel:Result} = require('../model/assignment');
 const {SubjectModel:Subject} = require('../model/subject');
 const {UserModel:User} = require('../model/user');
+const ROLES = require('../utils/enums');
 const responde = require('../utils/generalResponse');
 
 // Récupérer tous les assignments (GET)
@@ -28,52 +30,386 @@ const getSubject = async (id)=> {
     }
 }
 
-async function getAssignments(req, res){
-    let aggregateQuery = Assignment.aggregate([
-        { $lookup: { from: 'users', localField: 'author', foreignField: '_id', as: 'author' } },
-        { $lookup: { from: 'subjects', localField: 'subject', foreignField: '_id', as: 'subject' } },
-        { $lookup: { from: 'users', localField: 'subject.teacher', foreignField: '_id', as: 'teacherDetails' } },
-        {
-            $project: {
-              title: 1,
-              creationDate: 1,
-              description: 1,
-              author: 1,
-              isDone: 1,
-              isMark: 1,
-              deadline: 1,
-              subject: {
-                _id: 1,
-                name: 1,
-                __v: 1,
-                teacher: { $arrayElemAt: ['$teacherDetails', 0] }
-              }
+const getStudentNewAssignments = async (userId,page,limit)=> {
+    try {
+        const aggregateQuery = Assignment.aggregate([
+            {
+                $match :{
+                    results: {
+                        $not: {
+                            $elemMatch: {
+                                'author._id': userId
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                $sort: {
+                    creationDate: -1 // Sort by creationDate in descending order
+                }
+            }
+        ]); 
+        const results = await Assignment.aggregatePaginate(
+            aggregateQuery, 
+            {
+                page: page,
+                limit: limit
+            }
+        );
+        return results;
+    } catch (error) {
+        throw error;
+    }
+}
+
+const getStudentDoneAssignments = async (userId,page,limit)=> {
+    try {
+        const aggregateQuery = Assignment.aggregate([
+            {
+                $unwind : {
+                    path: '$results'
+                }
+            },
+            {
+                $match :{
+                    'results.author._id': userId,
+                    'results.isMarked': false
+                }
+            },
+            {
+                $sort: {
+                    'results.dateDone': -1, // Sort by creationDate in descending order
+                    creationDate : -1
+                }
+            }
+        ]); 
+        const results = await Assignment.aggregatePaginate(
+            aggregateQuery, 
+            {
+                page: page,
+                limit: limit
+            }
+        );
+        return results;
+    } catch (error) {
+        throw error;
+    }
+}
+
+const getTeacherDoneAssignments = async (userId,page,limit)=> {
+    try {
+        const aggregateQuery = Assignment.aggregate([
+            {
+                $unwind : {
+                    path: '$results'
+                }
+            },
+            {
+                $match :{
+                    'subject.teacher._id': userId,
+                    'results.isMarked': false
+                }
+            },
+            {
+                $sort: {
+                    'results.dateDone': -1, // Sort by creationDate in descending order
+                    creationDate : -1
+                }
+            }
+        ]); 
+        const results = await Assignment.aggregatePaginate(
+            aggregateQuery, 
+            {
+                page: page,
+                limit: limit
+            }
+        );
+        return results;
+    } catch (error) {
+        throw error;
+    }
+}
+
+const getStudentMarkedAssignments = async (userId,page,limit)=> {
+    try {
+        const aggregateQuery = Assignment.aggregate([
+            {
+                $unwind : {
+                    path: '$results'
+                }
+            },
+            {
+                $match :{
+                    'results.author._id': userId,
+                    'results.isMarked': true
+                }
+            },
+            {
+                $sort: {
+                    'results.dateDone': -1, // Sort by creationDate in descending order
+                    creationDate : -1
+                }
+            }
+        ]); 
+        const results = await Assignment.aggregatePaginate(
+            aggregateQuery, 
+            {
+                page: page,
+                limit: limit
+            }
+        );
+        return results;
+    } catch (error) {
+        throw error;
+    }
+}
+
+const getTeacherMarkedAssignments = async (userId,page,limit)=> {
+    try {
+        const aggregateQuery = Assignment.aggregate([
+            {
+                $unwind : {
+                    path: '$results'
+                }
+            },
+            {
+                $match :{
+                    'subject.teacher._id': userId,
+                    'results.isMarked': true
+                }
+            },
+            {
+                $sort: {
+                    'results.dateDone': -1, // Sort by creationDate in descending order
+                    creationDate : -1
+                }
+            }
+        ]); 
+        const results = await Assignment.aggregatePaginate(
+            aggregateQuery, 
+            {
+                page: page,
+                limit: limit
+            }
+        );
+        return results;
+    } catch (error) {
+        throw error;
+    }
+}
+
+const checkResult = async (assignmentId,userId) =>{
+    try {
+        const aggregateQuery = Assignment.aggregate([
+            {
+                $unwind : {
+                    path: '$results'
+                }
+            },
+            {
+                $match :{
+                    _id: assignmentId,
+                    'results.author._id': userId,
+                }
+            },
+            {
+                $sort: {
+                    'results.dateDone': -1, // Sort by creationDate in descending order
+                    creationDate : -1
+                }
+            }
+        ]); 
+        const results = await Assignment.aggregatePaginate(
+            aggregateQuery, 
+            {
+                page: 1,
+                limit: 10
+            }
+        );
+        return results;
+    } catch (error) {
+        throw error;
+    }
+}
+
+
+const addResult = async (req,res) =>{
+    let session = null;
+    try {
+        let session = await mongoose.startSession();
+        session.startTransaction();
+        const {
+            link
+        } = req.body;
+
+        const assignmentId = req.params.id;
+
+        const verif = await checkResult(assignmentId,req.user._id);
+        if(verif.docslength){
+            throw new Error(`${user._id} : ${user.name} already submited his result`);
+        } 
+        
+        const resultToInsert ={
+            assignmentId,
+            link,
+            author : req.user
+        }
+        
+        const rs = new Result(resultToInsert);
+        const resultat = await rs.save({ session });
+
+        const newAssignment = await Assignment.findOneAndUpdate(
+            { _id: assignmentId },
+            {
+                $push: { results: resultat } 
+            },
+            { new: true, session } // Return the updated document
+        );
+        await session.commitTransaction();
+        res.status(201).json(responde(newAssignment));
+    } catch (error) {
+        console.log(error);
+        if(session){
+            await session.abortTransaction();
+        }
+        res.status(400).json( responde({},error.message) );
+    }finally{
+        if(session){
+            session.endSession();
+        }
+    }
+}
+
+const addNote = async (req,res) =>{
+    let session = null;
+    try {    
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        const {
+            mark,
+            remark
+        } = req.body;
+
+        const resultId = req.params.id;
+
+        const exist = await Result.findOne({
+            _id : resultId 
+        });       
+
+        if(!exist){
+            throw new Error(`${resultId} result does not exists `);
+        }else{
+            if(exist.isMarked===true){
+                throw new Error(`${resultId} result already marked`);
             }
         }
+
+        const newResult = await Result.findByIdAndUpdate(
+            resultId,
+            {
+                mark : mark,
+                isMarked : true,
+                remark : remark,
+                dateMarked : new Date()
+            },{
+                new: true,
+                session
+            }
+        );
+
+        const newAssignment = await Assignment.findOneAndUpdate(
+            { _id: newResult.assignmentId },
+            {
+                'results.$[elem].mark': mark,
+                'results.$[elem].isMarked': true,
+                'results.$[elem].remark': remark,
+                'results.$[elem].dateMarked': newResult.dateMarked,
+            },
+            {
+                new: true,
+                session,
+                arrayFilters: [{ 'elem._id': newResult._id }]
+            }
+        );
+        
+        await session.commitTransaction();
+        res.status(201).json(responde(newAssignment));
+    } catch (error) {
+        console.log(error);
+        if(session){
+            await session.abortTransaction();
+        }
+        res.status(400).json( responde({},error.message) );
+    }finally{
+        if(session){
+            session.endSession();
+        }
+    }
+}
+
+
+const getAssignmentsToDo =  async (req,res) =>{
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const results = await getStudentNewAssignments(req.user._id,page,limit);
+        res.status(200).json(responde(results));    
+    } catch (error) {
+        console.log(error);
+        res.status(400).json(responde({},error.message));    
+    }
+}
+
+const getAssignmentsDone =  async (req,res) =>{
+    try {
+        const {user} = req;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        let results ={} 
+        if(user.role == ROLES.student){
+            results = await getStudentDoneAssignments(user._id,page,limit);
+        }else if(user.role == ROLES.teacher){
+            results = await getTeacherDoneAssignments(user._id,page,limit);
+        }
+        res.status(200).json(responde(results));    
+    } catch (error) {
+        console.log(error);
+        res.status(400).json(responde({},error.message));    
+    }
+}
+
+const getAssignmentsMarked =  async (req,res) =>{
+    try {
+        const {user} = req;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        let results ={} 
+        if(user.role == ROLES.student){
+            results = await getStudentMarkedAssignments(user._id,page,limit);
+        }else if(user.role == ROLES.teacher){
+            results = await getTeacherMarkedAssignments(user._id,page,limit);
+        }   
+    } catch (error) {
+        console.log(error);
+        res.status(400).json(responde({},error.message));    
+    }
+}
+
+async function getAssignments(req, res){
+    let aggregateQuery = Assignment.aggregate([
     ]);
 
     Assignment.aggregatePaginate(
         aggregateQuery, 
         {
             page: parseInt(req.query.page) || 1,
-            limit: parseInt(req.query.limit) || 10
+            limit: parseInt(req.query.limit) || 100
         },
         (err, data) => {
             if(err){
                 res.status(400).send(err)
             }
-    
-            data.docs.forEach(doc => {
-                if (doc.author && doc.author.length > 0) {
-                    doc.author = doc.author[0];
-                }
-                if (doc.subject && doc.subject.length > 0) {
-                    doc.subject = doc.subject[0];
-                }
-                if (doc.subject.teacher && doc.subject.teacher.length > 0) {
-                    doc.subject.teacher = doc.subject.teacher[0];
-                }
-            });
 
             res.status(201).send(data);
         }
@@ -118,9 +454,6 @@ async function postAssignment(req, res) {
     
     try {
         const subject = await getSubject(req.body.subject);
-        console.log("------------------")
-        console.log(subject);
-        console.log("------------------")
         const newAssignment = new Assignment({
           title: req.body.title,
           creationDate: new Date(),
@@ -164,283 +497,17 @@ async function deleteAssignment(req, res) {
 }
 
 
-async function getAssignmentWhereAuthorAndIsDoneFalse(req, res) {
-    let name = req.query.name;
-    let firstname = req.query.firstname;
 
-    let aggregateQuery = Assignment.aggregate([
-        { $lookup: { from: 'users', localField: 'author', foreignField: '_id', as: 'author' } },
-        { $lookup: { from: 'subjects', localField: 'subject', foreignField: '_id', as: 'subject' } },
-        { $lookup: { from: 'users', localField: 'subject.teacher', foreignField: '_id', as: 'teacherDetails' } },
-        {
-            $project: {
-              title: 1,
-              creationDate: 1,
-              description: 1,
-              author: 1,
-              isDone: 1,
-              isMark: 1,
-              deadline: 1,
-              subject: {
-                _id: 1,
-                name: 1,
-                __v: 1,
-                teacher: { $arrayElemAt: ['$teacherDetails', 0] }
-              }
-            }
-        },
-        { $match: { "author.name": name, "author.firstname": firstname, "isDone": false } }
-    ]);
 
-    Assignment.aggregatePaginate(
-        aggregateQuery, 
-        {
-            page: parseInt(req.query.page) || 1,
-            limit: parseInt(req.query.limit) || 10
-        },
-        (err, data) => {
-            if(err){
-                res.status(400).send(err)
-            }
-    
-            data.docs.forEach(doc => {
-                if (doc.author && doc.author.length > 0) {
-                    doc.author = doc.author[0];
-                }
-                if (doc.subject && doc.subject.length > 0) {
-                    doc.subject = doc.subject[0];
-                }
-            });
-
-            res.status(201).send(data);
-        }
-    );
-}
-
-async function getAssignmentWhereAuthorAndIsMarkFalse(req, res) {
-    let name = req.query.name;
-    let firstname = req.query.firstname;
-
-    let aggregateQuery = Assignment.aggregate([
-        { $lookup: { from: 'users', localField: 'author', foreignField: '_id', as: 'author' } },
-        { $lookup: { from: 'subjects', localField: 'subject', foreignField: '_id', as: 'subject' } },
-        { $lookup: { from: 'users', localField: 'subject.teacher', foreignField: '_id', as: 'teacherDetails' } },
-        {
-            $project: {
-              title: 1,
-              creationDate: 1,
-              description: 1,
-              author: 1,
-              isDone: 1,
-              isMark: 1,
-              deadline: 1,
-              subject: {
-                _id: 1,
-                name: 1,
-                __v: 1,
-                teacher: { $arrayElemAt: ['$teacherDetails', 0] }
-              }
-            }
-        },
-        { $match: { "author.name": name, "author.firstname": firstname, "isDone": true, "isMark": false } }
-    ]);
-
-    Assignment.aggregatePaginate(
-        aggregateQuery, 
-        {
-            page: parseInt(req.query.page) || 1,
-            limit: parseInt(req.query.limit) || 10
-        },
-        (err, data) => {
-            if(err){
-                res.status(400).send(err)
-            }
-    
-            data.docs.forEach(doc => {
-                if (doc.author && doc.author.length > 0) {
-                    doc.author = doc.author[0];
-                }
-                if (doc.subject && doc.subject.length > 0) {
-                    doc.subject = doc.subject[0];
-                }
-            });
-
-            res.status(201).send(data);
-        }
-    );
-}
-
-async function getAssignmentWhereAuthorAndIsMarkTrue(req, res) {
-    let name = req.query.name;
-    let firstname = req.query.firstname;
-
-    let aggregateQuery = Assignment.aggregate([
-        { $lookup: { from: 'users', localField: 'author', foreignField: '_id', as: 'author' } },
-        { $lookup: { from: 'subjects', localField: 'subject', foreignField: '_id', as: 'subject' } },
-        { $lookup: { from: 'users', localField: 'subject.teacher', foreignField: '_id', as: 'teacherDetails' } },
-        {
-            $project: {
-              title: 1,
-              creationDate: 1,
-              description: 1,
-              author: 1,
-              isDone: 1,
-              isMark: 1,
-              deadline: 1,
-              subject: {
-                _id: 1,
-                name: 1,
-                __v: 1,
-                teacher: { $arrayElemAt: ['$teacherDetails', 0] }
-              }
-            }
-        },
-        { $match: { "author.name": name, "author.firstname": firstname, "isMark": true } }
-    ]);
-
-    Assignment.aggregatePaginate(
-        aggregateQuery, 
-        {
-            page: parseInt(req.query.page) || 1,
-            limit: parseInt(req.query.limit) || 10
-        },
-        (err, data) => {
-            if(err){
-                res.status(400).send(err)
-            }
-    
-            data.docs.forEach(doc => {
-                if (doc.author && doc.author.length > 0) {
-                    doc.author = doc.author[0];
-                }
-                if (doc.subject && doc.subject.length > 0) {
-                    doc.subject = doc.subject[0];
-                }
-            });
-
-            res.status(201).send(data);
-        }
-    );
-}
-
-async function getAssignmentWhereTeacherAndIsNotMarked(req, res) {
-    let name = req.query.name;
-    let firstname = req.query.firstname;
-
-    let aggregateQuery = Assignment.aggregate([
-        { $lookup: { from: 'users', localField: 'author', foreignField: '_id', as: 'author' } },
-        { $lookup: { from: 'subjects', localField: 'subject', foreignField: '_id', as: 'subject' } },
-        { $lookup: { from: 'users', localField: 'subject.teacher', foreignField: '_id', as: 'teacherDetails' } },
-        {
-            $project: {
-              title: 1,
-              creationDate: 1,
-              description: 1,
-              author: 1,
-              isDone: 1,
-              isMark: 1,
-              deadline: 1,
-              subject: {
-                _id: 1,
-                name: 1,
-                __v: 1,
-                teacher: { $arrayElemAt: ['$teacherDetails', 0] }
-              }
-            }
-        },
-        { $unwind: "$subject" },
-        { $match: { 
-            "subject.teacher.name": name,
-            "subject.teacher.firstname": firstname,
-            "isDone": true,
-            "isMark": false
-        } }
-    ]);
-
-    Assignment.aggregatePaginate(
-        aggregateQuery, 
-        {
-            page: parseInt(req.query.page) || 1,
-            limit: parseInt(req.query.limit) || 10
-        },
-        (err, data) => {
-            if(err){
-                res.status(400).send(err)
-            }
-    
-            data.docs.forEach(doc => {
-                if (doc.author && doc.author.length > 0) {
-                    doc.author = doc.author[0];
-                }
-                if (doc.subject && doc.subject.length > 0) {
-                    doc.subject = doc.subject[0];
-                }
-            });
-
-            res.status(201).send(data);
-        }
-    );
-}
-
-async function getAssignmentWhereTeacherAndIsMarked(req, res) {
-    let name = req.query.name;
-    let firstname = req.query.firstname;
-
-    let aggregateQuery = Assignment.aggregate([
-        { $lookup: { from: 'users', localField: 'author', foreignField: '_id', as: 'author' } },
-        { $lookup: { from: 'subjects', localField: 'subject', foreignField: '_id', as: 'subject' } },
-        { $lookup: { from: 'users', localField: 'subject.teacher', foreignField: '_id', as: 'teacherDetails' } },
-        {
-            $project: {
-              title: 1,
-              creationDate: 1,
-              description: 1,
-              author: 1,
-              isDone: 1,
-              isMark: 1,
-              deadline: 1,
-              subject: {
-                _id: 1,
-                name: 1,
-                __v: 1,
-                teacher: { $arrayElemAt: ['$teacherDetails', 0] }
-              }
-            }
-        },
-        { $unwind: "$subject" },
-        { $match: { 
-            "subject.teacher.name": name,
-            "subject.teacher.firstname": firstname,
-            "isDone": true,
-            "isMark": true
-        } }
-    ]);
-
-    Assignment.aggregatePaginate(
-        aggregateQuery, 
-        {
-            page: parseInt(req.query.page) || 1,
-            limit: parseInt(req.query.limit) || 10
-        },
-        (err, data) => {
-            if(err){
-                res.status(400).send(err)
-            }
-    
-            data.docs.forEach(doc => {
-                if (doc.author && doc.author.length > 0) {
-                    doc.author = doc.author[0];
-                }
-                if (doc.subject && doc.subject.length > 0) {
-                    doc.subject = doc.subject[0];
-                }
-            });
-
-            res.status(201).send(data);
-        }
-    );
-}
-
-module.exports = { getAssignments, postAssignment, getAssignment, updateAssignment, deleteAssignment,
-                getAssignmentWhereAuthorAndIsDoneFalse, getAssignmentWhereAuthorAndIsMarkFalse, getAssignmentWhereAuthorAndIsMarkTrue,
-                getAssignmentWhereTeacherAndIsNotMarked, getAssignmentWhereTeacherAndIsMarked };
+module.exports = { 
+    addNote,
+    addResult,
+    getAssignmentsMarked,
+    getAssignmentsDone,
+    getAssignmentsToDo,
+    getAssignments,
+    postAssignment, 
+    getAssignment, 
+    updateAssignment, 
+    deleteAssignment,
+ };
