@@ -408,10 +408,10 @@ async function getAssignments(req, res){
         },
         (err, data) => {
             if(err){
-                res.status(400).send(err)
+                res.status(400).json(responde({}, err.message));
+            } else {
+                res.status(200).json(responde(data, "Liste assignments OK"));
             }
-
-            res.status(201).send(data);
         }
     );
 }
@@ -423,31 +423,16 @@ async function getAssignment(req, res){
         const assignment = await Assignment.findById(assignmentId);
     
         if (!assignment) {
-          return res.status(404).json({ message: 'Assignment not found' });
+            res.status(400).json(responde({}, 'Assignment not found'));
+        } else {
+            res.status(200).json(responde(assignment));
         }
-
-        const subject = await Subject.findById(assignment.subject);
-
-        const author = await User.findById(assignment.author);
     
-        const teacher = await User.findById(subject.teacher);
-
-        const response = {
-          ...assignment._doc,
-          subject: {
-            ...subject._doc,
-            teacher: teacher._doc
-          },
-          author: author._doc
-        };
-    
-        res.status(200).json(response);
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        console.log(err)
+        res.status(400).json(responde({}, err.message));
     }
 }
-
-
 
 // Ajout d'un assignment (POST)
 async function postAssignment(req, res) {
