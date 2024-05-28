@@ -1,6 +1,7 @@
 const {AssignmentModel:Assignment} = require('../model/assignment');
 const {SubjectModel:Subject} = require('../model/subject');
 const {UserModel:User} = require('../model/user');
+const responde = require('../utils/generalResponse');
 
 // Récupérer tous les assignments (GET)
 /*
@@ -14,6 +15,18 @@ function getAssignments(req, res){
     });
 }
 */
+
+const getSubject = async (id)=> {
+    try {
+        const subject = await Subject.findById(id);
+        if(!subject){
+            throw new Error("Subject not found");
+        }
+        return subject;
+    } catch (error) {
+        throw error;
+    }
+}
 
 async function getAssignments(req, res){
     let aggregateQuery = Assignment.aggregate([
@@ -98,28 +111,29 @@ async function getAssignment(req, res){
     }
 }
 
+
+
 // Ajout d'un assignment (POST)
 async function postAssignment(req, res) {
-    const newAssignment = new Assignment({
-      title: req.body.title,
-      creationDate: new Date(),
-      description: req.body.description,
-      subject: req.body.subject,
-      author: req.body.author,
-      isDone: req.body.isDone,
-      dateDone: req.body.dateDone,
-      isMark: req.body.isMark,
-      mark: req.body.mark,
-      remark: req.body.remark,
-      deadline: new Date(req.body.deadline),
-      link: req.body.link
-    });
-  
+    
     try {
-      const savedAssignment = await newAssignment.save();
-      res.status(201).json(savedAssignment);
+        const subject = await getSubject(req.body.subject);
+        console.log("------------------")
+        console.log(subject);
+        console.log("------------------")
+        const newAssignment = new Assignment({
+          title: req.body.title,
+          creationDate: new Date(),
+          description: req.body.description,
+          subject: subject,
+          deadline: new Date(req.body.deadline),
+          link: req.body.link
+        });
+        const savedAssignment = await newAssignment.save();
+        res.status(201).json(responde(savedAssignment));
     } catch (err) {
-      res.status(400).json({ message: err.message });
+        console.log(err)
+        res.status(400).json( responde({},err.message) );
     }
 };
 
