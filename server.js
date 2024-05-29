@@ -88,7 +88,7 @@ app.route(prefix + '/teachers')
   .get(auth,check(ROLES.admin),user.getTeachers);
 
 app.route(prefix + '/students')
-  .get(auth,check(ROLES.admin),user.getStudents);
+  .get(auth,check(ROLES.admin,ROLES.teacher),user.getStudents);
 
 // Assignments
 app.route(prefix + '/assignments')
