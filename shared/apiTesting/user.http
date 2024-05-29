@@ -2,8 +2,8 @@ POST http://localhost:8010/api/users/login
 content-type: application/json
 
 {
-    "login": "tix@gmail.gg",
-    "password": "tix"
+    "login": "hmaidlow1k",
+    "password": "0000"
 }
 
 ###

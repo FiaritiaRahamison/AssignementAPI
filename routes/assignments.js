@@ -48,6 +48,18 @@ const getStudentNewAssignments = async (userId,page,limit)=> {
                 $sort: {
                     creationDate: -1 // Sort by creationDate in descending order
                 }
+            },
+            {
+                $project:{
+                    _id: 1,
+                    title: 1,
+                    creationDate: 1,
+                    description: 1,
+                    subject: 1,
+                    deadline: 1,
+                    link: 1,
+                    results :{$literal: undefined}
+                }
             }
         ]); 
         const results = await Assignment.aggregatePaginate(
