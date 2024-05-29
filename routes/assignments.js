@@ -580,7 +580,6 @@ const getTeacherAverageMarksByStudent = async (userId, page, limit) => {
           $project: {
             _id: 0,
             student: '$_id.student',
-            teacher: '$_id.teacher',
             subject: '$_id.subject',
             averageMark: 1,
             assignments: 1
@@ -600,7 +599,7 @@ const getTeacherAverageMarksByStudent = async (userId, page, limit) => {
     }
 }
 
-const getAverageMarkBySubject = async (req,res) => {
+const getAverageMark = async (req,res) => {
     try {
         const {user} = req;
         const page = parseInt(req.query.page) || 1;
@@ -631,5 +630,5 @@ module.exports = {
     getAssignmentResult,
     updateAssignment, 
     deleteAssignment,
-    getAverageMarkBySubject,
+    getAverageMark,
  };
