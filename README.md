@@ -39,4 +39,7 @@ Ce projet consiste à développer une API pour gérer des assignments. L'API per
 * [MongoDB](https://mongodb.com/) - Base de données
 * [Mongoose](https://mongoosejs.com/) - Bibliotèque de connexion entre MongoDB et NodeJS
 
+## URL du projet backend hebergé sur render.com
+https://assignementapi.onrender.com
+
 
