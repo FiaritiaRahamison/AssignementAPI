@@ -29,6 +29,30 @@ const getTeachers = async (req,res) =>{
     );
 }
 
+const getStudents = async (req,res) =>{
+    let aggregateQuery = User.aggregate([{
+        $match :{
+            role : ROLES.student
+        }
+    }]);
+
+    User.aggregatePaginate(
+        aggregateQuery,
+        {
+            page: parseInt(req.query.page) || 1,
+            limit: parseInt(req.query.limit) || 100
+        },
+        (err, data) => {
+            if(err){
+                console.log(err);
+                res.status(400).json(responde({},err.message));
+            }else{
+                res.status(200).json(responde(data));
+            }
+        }
+    );
+}
+
 //Récupérer tous les users (GET)
 async function getUsers(req, res) {
     let aggregateQuery = User.aggregate();
@@ -149,4 +173,4 @@ async function loginUser(req, res) {
     }
 }
 
-module.exports = { getUsers, getUser, postUser, updateUser, deteleUser, loginUser , getTeachers};
+module.exports = { getUsers, getUser, postUser, updateUser, deteleUser, loginUser , getTeachers, getStudents};

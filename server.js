@@ -87,6 +87,9 @@ app.route(prefix + '/users/login')
 app.route(prefix + '/teachers')
   .get(auth,check(ROLES.admin),user.getTeachers);
 
+app.route(prefix + '/students')
+  .get(auth,check(ROLES.admin),user.getStudents);
+
 // Assignments
 app.route(prefix + '/assignments')
 .post(auth,check(ROLES.teacher),assignment.postAssignment)
