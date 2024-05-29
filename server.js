@@ -104,6 +104,9 @@ app.route(prefix + '/assignments/toDo')
 app.route(prefix + '/assignments/marked')
   .get(auth,check(ROLES.student,ROLES.teacher),assignment.getAssignmentsMarked);
 
+app.route(prefix + '/assignments/average')
+  .get(auth,check(ROLES.student, ROLES.teacher),assignment.getAverageMarkBySubject);
+
 app.route(prefix + '/assignments/result/:id')
   .post(auth,check(ROLES.teacher),assignment.addNote)
   .get(auth,assignment.getAssignmentResult);

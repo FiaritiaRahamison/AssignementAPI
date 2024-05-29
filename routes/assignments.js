@@ -537,6 +537,87 @@ async function getAssignmentResult(req, res){
     }
 }
 
+const getStudentAverageMarksBySubject = async (userId, page, limit) => {
+    try {
+      const aggregateQuery = Assignment.aggregate([
+        { $unwind: { path: '$results' } },
+        { $match: { 'results.author._id': userId, 'results.isMarked': true } },
+        {
+          $group: {
+            _id: '$subject',
+            averageMark: { $avg: '$results.mark' },
+            assignments: { $push: '$$ROOT' }
+          }
+        },
+        { $project: { _id: 0, subject: '$_id', averageMark: 1, assignments: 1 } },
+        { $sort: { averageMark: -1 } }
+      ]);
+  
+      const results = await Assignment.aggregatePaginate(
+        aggregateQuery,
+        { page: page, limit: limit }
+      );
+  
+      return results;
+    } catch (error) {
+      throw error;
+    }
+}
+
+const getTeacherAverageMarksByStudent = async (userId, page, limit) => {
+    try {
+      const aggregateQuery = Assignment.aggregate([
+        { $unwind: { path: '$results' } },
+        { $match: { 'results.isMarked': true, 'subject.teacher._id': userId } },
+        {
+          $group: {
+            _id: { student: '$results.author', teacher: '$subject.teacher', subject: '$subject' },
+            averageMark: { $avg: '$results.mark' },
+            assignments: { $push: '$$ROOT' }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            student: '$_id.student',
+            teacher: '$_id.teacher',
+            subject: '$_id.subject',
+            averageMark: 1,
+            assignments: 1
+          }
+        },
+        { $sort: { averageMark: -1 } }
+      ]);
+  
+      const results = await Assignment.aggregatePaginate(
+        aggregateQuery,
+        { page: page, limit: limit }
+      );
+  
+      return results;
+    } catch (error) {
+      throw error;
+    }
+}
+
+const getAverageMarkBySubject = async (req,res) => {
+    try {
+        const {user} = req;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        let results ={}
+        if(user.role == ROLES.student) {
+            results = await getStudentAverageMarksBySubject(user._id,page,limit);
+        }else if(user.role == ROLES.teacher) {
+            results = await getTeacherAverageMarksByStudent(user._id,page,limit);
+        }
+        res.status(200).json(responde(results));    
+    } catch(error) {
+        console.log(error);
+        res.status(400).json(responde({},error.message));
+    }
+}
+
 
 module.exports = { 
     addNote,
@@ -550,4 +631,5 @@ module.exports = {
     getAssignmentResult,
     updateAssignment, 
     deleteAssignment,
+    getAverageMarkBySubject,
  };
