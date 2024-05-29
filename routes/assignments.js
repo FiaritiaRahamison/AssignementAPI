@@ -617,6 +617,52 @@ const getAverageMark = async (req,res) => {
     }
 }
 
+const getAverageMarksBySubject = async (page, limit) => {
+    try {
+      const aggregateQuery = Assignment.aggregate([
+        { $unwind: { path: '$results' } },
+        { $match: { 'results.isMarked': true } },
+        {
+          $group: {
+            _id: '$subject',
+            totalMarks: { $sum: '$results.mark' },
+            totalAssignments: { $sum: 1 }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            subject: '$_id',
+            averageMark: { $divide: ['$totalMarks', '$totalAssignments'] }
+          }
+        },
+        { $sort: { averageMark: -1 } }
+      ]);
+  
+      const results = await Assignment.aggregatePaginate(
+        aggregateQuery,
+        { page: page, limit: limit }
+      );
+  
+      return results;
+    } catch (error) {
+      throw error;
+    }
+}
+
+const getAverageMarkGroupBySubject = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        let results ={}
+        results = await getAverageMarksBySubject(page, limit);
+        res.status(200).json(responde(results));    
+    } catch(error) {
+        console.log(error);
+        res.status(400).json(responde({},error.message)); 
+    }
+}
+
 
 module.exports = { 
     addNote,
@@ -631,4 +677,5 @@ module.exports = {
     updateAssignment, 
     deleteAssignment,
     getAverageMark,
+    getAverageMarkGroupBySubject
  };
