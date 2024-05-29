@@ -44,3 +44,9 @@ Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NDIwMzc1M
     "mark": 14,
     "remark": "mety io my nigga"
 }
+
+###
+
+GET http://localhost:8010/api/assignments/result/6656ff5645c59b5ae81d41b6
+content-type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NTY0YmM0MmZlNjFlM2VjYzVhZjg4NCIsImlhdCI6MTcxNjk4MzEyMCwiZXhwIjoxNzE3NTg3OTIwfQ.JyPnh0oHQRqkqpJdyg6X7uYrmiLCCtlJ0kRGjh9_aZw
