@@ -409,6 +409,30 @@ const getAssignmentsMarked =  async (req,res) =>{
     }
 }
 
+const getStudentResultAssignment = async (resultId)=> {
+    try {
+        const results = await Assignment.aggregate([
+            {
+                $unwind : {
+                    path: '$results'
+                }
+            },
+            {
+                $match :{
+                    'results._id': mongoose.Types.ObjectId(resultId)
+                }
+            },
+        ]);
+        if (results && results.length > 0) {
+            return results[0];
+        }
+
+        return null;
+    } catch (error) {
+        throw error;
+    }
+}
+
 async function getAssignments(req, res){
     let aggregateQuery = Assignment.aggregate([
     ]);
@@ -446,6 +470,7 @@ async function getAssignment(req, res){
         res.status(400).json(responde({}, err.message));
     }
 }
+
 
 // Ajout d'un assignment (POST)
 async function postAssignment(req, res) {
@@ -494,7 +519,23 @@ async function deleteAssignment(req, res) {
     })
 }
 
-
+// Récupérer un assignmentResult par son id (GET)
+async function getAssignmentResult(req, res){
+    let assignmentId = req.params.id;
+    try {
+        const assignmentResult = await getStudentResultAssignment(assignmentId);
+    
+        if (!assignmentResult) {
+            res.status(400).json(responde({}, 'AssignmentResult not found'));
+        } else {
+            res.status(200).json(responde(assignmentResult));
+        }
+    
+    } catch (err) {
+        console.log(err)
+        res.status(400).json(responde({}, err.message));
+    }
+}
 
 
 module.exports = { 
@@ -505,7 +546,8 @@ module.exports = {
     getAssignmentsToDo,
     getAssignments,
     postAssignment, 
-    getAssignment, 
+    getAssignment,
+    getAssignmentResult,
     updateAssignment, 
     deleteAssignment,
  };

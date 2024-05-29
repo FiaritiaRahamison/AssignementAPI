@@ -105,7 +105,8 @@ app.route(prefix + '/assignments/marked')
   .get(auth,check(ROLES.student,ROLES.teacher),assignment.getAssignmentsMarked);
 
 app.route(prefix + '/assignments/result/:id')
-  .post(auth,check(ROLES.teacher),assignment.addNote);
+  .post(auth,check(ROLES.teacher),assignment.addNote)
+  .get(auth,assignment.getAssignmentResult);
 
 app.route(prefix + '/assignment/:id')
   .post(auth,check(ROLES.student),assignment.addResult)
