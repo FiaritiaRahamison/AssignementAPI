@@ -49,7 +49,8 @@ app.use(function (req, res, next) {
 
 // Pour les formulaires
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+// express.json({limit: '20mb'});
+app.use(bodyParser.json({limit: '20mb'}));
 
 // Obligatoire si déploiement dans le cloud !
 let port = process.env.PORT || 8010;

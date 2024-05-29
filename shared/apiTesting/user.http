@@ -2,8 +2,8 @@ POST http://localhost:8010/api/users/login
 content-type: application/json
 
 {
-    "login": "sbrabender14",
-    "password": "password"
+    "login": "firon7",
+    "password": "123456!"
 }
 
 ###
