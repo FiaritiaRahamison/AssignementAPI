@@ -390,6 +390,7 @@ const getAssignmentsMarked =  async (req,res) =>{
         }else if(user.role == ROLES.teacher){
             results = await getTeacherMarkedAssignments(user._id,page,limit);
         }   
+        res.status(200).json(responde(results));
     } catch (error) {
         console.log(error);
         res.status(400).json(responde({},error.message));    
