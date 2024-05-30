@@ -118,7 +118,7 @@ app.route(prefix + '/assignments/result/:id')
 app.route(prefix + '/assignment/:id')
   .post(auth,check(ROLES.student),assignment.addResult)
   .get(auth,assignment.getAssignment)
-  .put(auth,check(ROLES.teacher),assignment.updateAssignment)
+  .put(auth,check(ROLES.teacher, ROLES.admin),assignment.updateAssignment)
   .delete(auth,check(ROLES.teacher, ROLES.admin),assignment.deleteAssignment);
 
 
