@@ -1,9 +1,57 @@
+const mongoose = require('mongoose');
 const { UserModel:User } = require('../model/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const responde = require('../utils/generalResponse');
 const {generateToken} = require('../utils/jwt');
 const ROLES = require('../utils/enums');
+const { AssignmentModel:Assignement } = require('../model/assignment');
+
+const getBulletin = async(req,res)=>{
+    try {
+        const userId = req.params.id;
+        const user = await User.findById(id);
+        const notes = await Assignement.aggregate([
+            {
+                $unwind : {
+                    path: '$results'
+                }
+            },{
+              $match :{
+                'results.author._id': mongoose.Types.ObjectId(userId),
+                'results.isMarked' : true
+              }
+            },{
+              $group : {
+                _id : '$subject._id',
+                note : {$avg : '$results.mark'}
+              }
+            },
+            {
+              $lookup: {
+                from: 'subjects',
+                localField: '_id',
+                foreignField: '_id',
+                as: 'subject'
+              }
+            }
+        ]);
+        let moyenne = 0
+        notes.forEach((element)=>{
+            moyenne+=element.note/notes.length;
+            element.subject = element.subject[0];
+        })
+        const bulletin = {
+            user : user,
+            notes : notes,
+            moyenne : moyenne
+        }
+        res.status(200).json(responde(bulletin));
+    } catch (error) {
+        console.log(error);
+        res.status(400).json(responde({},error.message));
+    }
+}
 
 const getTeachers = async (req,res) =>{
     let aggregateQuery = User.aggregate([{
@@ -193,4 +241,4 @@ async function loginUser(req, res) {
     }
 }
 
-module.exports = { getUsers, getUser, postUser, updateUser, deleteUser, loginUser , getTeachers, getStudents};
+module.exports = { getBulletin,getUsers, getUser, postUser, updateUser, deteleUser, loginUser , getTeachers, getStudents};
