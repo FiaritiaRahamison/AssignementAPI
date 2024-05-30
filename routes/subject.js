@@ -77,16 +77,31 @@ async function postSubject(req, res) {
 }
 
 async function updateSubject(req, res) {
-    console.log("UPDATE recu subject : ");
-    console.log(req.body);
-    Subject.findByIdAndUpdate(req.params.id, req.body, {new: true}, (err, subject) => {
-        if(err) {
-            console.log(err)
-            res.status(400).json(responde({},err.message));
-        }else{
-            res.status(201).json(responde(subject,`${subject.name} updated`))
+    try {
+        const {
+            _id:id,
+            name,
+            teacher,
+            photo
+        } = req.body
+        const newTeacher = await User.findById(teacher._id);
+        
+        if(!newTeacher){
+            throw new Error("teacher invalide")
         }
-    })
+
+        const updateSub = {
+            name : name,
+            photo : photo,
+            teacher : newTeacher
+        } 
+        const newSubject = await Subject.findByIdAndUpdate(id, updateSub, {new: true})
+        res.status(201).json(responde(newSubject,`${newSubject.name} updated`))
+        
+    } catch (err) {
+        console.log(err)
+        res.status(400).json(responde({},err.message));
+    }
 }
 
 async function deleteSubject(req, res) {
