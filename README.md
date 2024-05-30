@@ -2,8 +2,8 @@
 Ce projet consiste à développer une API pour gérer des assignments. L'API permet aux utilisateurs de créer, lire, mettre à jour et supprimer des assignements.
 
 ## Auteurs
-* **Rahamison Fiaritia Naliarilala (N°16)**  _alias_ [@FiaritiaRahamison](https://github.com/FiaritiaRahamison/)
-* **Ramilison Solofoniaina Mendrika Fitahiana (N°35)**  _alias_ [@mendrikafitahiana](https://github.com/mendrikafitahiana)
+* **Rahamison Fiaritia Naliarilala (N°14)**  _alias_ [@FiaritiaRahamison](https://github.com/FiaritiaRahamison/)
+* **Ramilison Solofoniaina Mendrika Fitahiana (N°33)**  _alias_ [@mendrikafitahiana](https://github.com/mendrikafitahiana)
 
 ## Contributions
 | Tâches        | Détails      | Contributeurs |
@@ -25,6 +25,7 @@ Ce projet consiste à développer une API pour gérer des assignments. L'API per
 |Création user|API pour créer un utilisateur|[@mendrikafitahiana](https://github.com/mendrikafitahiana)|
 |Liste user|API pour consulter la liste des utilisateurs|[@FiaritiaRahamison](https://github.com/FiaritiaRahamison/)|
 |Modification user|API pour pouvoir modifier un utilisateur|[@mendrikafitahiana](https://github.com/mendrikafitahiana)|
+|Bulletin élève|API pour obtenir la moyenne des notes par matières d'un élève et la moyenne générale|[@FiaritiaRahamison](https://github.com/FiaritiaRahamison/)|
 |Accès APIs|Gérer l'accès aux APIs (ne pas permettre certaines actions pour certains utilisateur basé sur leur role)|[@FiaritiaRahamison](https://github.com/FiaritiaRahamison/)|
 |Hebergement| Hebergement du backend sur render.com|[@mendrikafitahiana](https://github.com/mendrikafitahiana)|
 
