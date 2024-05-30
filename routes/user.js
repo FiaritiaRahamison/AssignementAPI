@@ -10,7 +10,7 @@ const { AssignmentModel:Assignement } = require('../model/assignment');
 const getBulletin = async(req,res)=>{
     try {
         const userId = req.params.id;
-        const user = await User.findById(id);
+        const user = await User.findById(userId);
         const notes = await Assignement.aggregate([
             {
                 $unwind : {
@@ -212,12 +212,12 @@ async function loginUser(req, res) {
     try {
         const user = await User.findOne({ login });
         if(!user) {
-            res.status(400).json(responde({},'Utilisateur introuvable'));
+            throw new Error('Utilisateur introuvable');
         }
 
         const isPasswordMatch = await bcrypt.compare(password, user.password);
         if(!isPasswordMatch) {
-            res.status(400).json(responde({},'Mot de passe incorrect'));
+            throw new Error('Mot de passe incorrect');
         }
 
         const token = generateToken({id : user._id});
@@ -241,4 +241,4 @@ async function loginUser(req, res) {
     }
 }
 
-module.exports = { getBulletin,getUsers, getUser, postUser, updateUser, deteleUser, loginUser , getTeachers, getStudents};
+module.exports = { getBulletin,getUsers, getUser, postUser, updateUser, deleteUser, loginUser , getTeachers, getStudents};
