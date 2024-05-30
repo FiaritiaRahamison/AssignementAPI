@@ -128,14 +128,34 @@ async function updateUser(req, res) {
     });
 }
 
-async function deteleUser(req, res) {
-    User.findByIdAndRemove(req.params.id, (err, user) => {
-        if(err) {
-            console.log(err)
-            res.status(400).send(err);
+async function deleteUser(req, res) {
+    try {
+      const userToDelete = await User.findById(req.params.id);
+      if (!userToDelete) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      const currentUser = req.user;
+  
+      if (currentUser.role === ROLES.admin) {
+        await User.findByIdAndRemove(req.params.id);
+        return res.status(201).json({ message: `${userToDelete.name} deleted` });
+      }
+  
+      if (currentUser.role === ROLES.teacher) {
+        if (userToDelete.role === ROLES.student) {
+          await User.findByIdAndRemove(req.params.id);
+          return res.status(201).json({ message: `${userToDelete.name} deleted` });
+        } else {
+          return res.status(403).json({ message: 'You do not have permission to delete this user' });
         }
-        res.status(201).json({message: `${user.name} deleted`});
-    })
+      }
+  
+      return res.status(403).json({ message: 'You do not have permission to delete this user' });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Erreur serveur' });
+    }
 }
 
 async function loginUser(req, res) {
@@ -173,4 +193,4 @@ async function loginUser(req, res) {
     }
 }
 
-module.exports = { getUsers, getUser, postUser, updateUser, deteleUser, loginUser , getTeachers, getStudents};
+module.exports = { getUsers, getUser, postUser, updateUser, deleteUser, loginUser , getTeachers, getStudents};

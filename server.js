@@ -79,7 +79,7 @@ app.route(prefix + '/users')
 
 app.route(prefix + '/users/:id')
   .get(auth,user.getUser)
-  .delete(auth,check(ROLES.admin),user.deteleUser)
+  .delete(auth,check(ROLES.admin, ROLES.teacher),user.deleteUser)
   .put(auth,check(ROLES.admin),user.updateUser);
 
 app.route(prefix + '/users/login')
