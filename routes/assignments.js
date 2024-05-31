@@ -476,15 +476,15 @@ async function getAssignment(req, res){
 async function postAssignment(req, res) {
     
     try {
-        const subject = await getSubject(req.body.subject);
         const newAssignment = new Assignment({
           title: req.body.title,
           creationDate: new Date(),
           description: req.body.description,
-          subject: subject,
+          subject: req.body.subject,
           deadline: new Date(req.body.deadline),
           link: req.body.link
         });
+        console.log("newAssignment", newAssignment);
         const savedAssignment = await newAssignment.save();
         res.status(201).json(responde(savedAssignment));
     } catch (err) {

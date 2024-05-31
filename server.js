@@ -91,6 +91,9 @@ app.route(prefix + '/users/login')
 app.route(prefix + '/teachers')
   .get(auth,check(ROLES.admin),user.getTeachers);
 
+app.route(prefix+'/subject/teacher/:id')
+  .get(auth,check(ROLES.admin, ROLES.teacher),subject.getRelatedTeacher);
+
 app.route(prefix + '/students')
   .get(auth,check(ROLES.admin,ROLES.teacher),user.getStudents);
 

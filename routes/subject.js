@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const {SubjectModel:Subject} = require('../model/subject');
 const { UserModel:User } = require('../model/user');
 const ROLES = require('../utils/enums');
@@ -16,6 +17,19 @@ const getTeacher = async (id)=>{
     }
 }
 
+//Récupérer un user par son id (GET)
+async function getRelatedTeacher(req, res) {
+    try {
+    let teacherId = req.params.id;
+    // console.log(">>>>>>>>>>>>>>>>>>>>", teacherId);
+    const subject = await Subject.findOne({'teacher._id': teacherId});
+    // console.log(subject);
+    res.status(201).json(responde(subject));
+} catch (err) {
+    console.log(err);
+    res.status(400).json(responde({},err.message));
+}
+};
 
 async function getSubjects(req, res){
 
@@ -116,4 +130,4 @@ async function deleteSubject(req, res) {
     })
 }
 
-module.exports = { getSubjects, getSubject, postSubject, updateSubject, deleteSubject };
+module.exports = { getRelatedTeacher, getSubjects, getSubject, postSubject, updateSubject, deleteSubject };
